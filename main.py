@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 """
-Testing tab delay line input for b31xp
+Testing tap delay line input for b31xp
 """
 
 import numpy as np
@@ -22,7 +22,7 @@ from tensorflow.keras.layers import Dense
 # GLOBALS
 ###############################################################################
 
-TAB_DELAY = 10
+TAP_DELAY = 8
 SAMPLE_SIZE = 20000
 TEST_SIZE = 0.2
 EPOCHS = 150
@@ -40,29 +40,29 @@ tx = [value[0] for value in mat_data['PAMsymTx']]
 rx = [value[0] for value in mat_data['PAMsymRx']]
 
 
-# convert to numpy arrays (take only first 20000 points)
+# convert to numpy arrays (take only first SAMPLE_SIZE points)
 tx = np.array(tx)[:SAMPLE_SIZE]
 rx = np.array(rx)[:SAMPLE_SIZE]
 
 
-def to_tab_delay(data):
+def to_tap_delay(data):
     """
-    converts 1D Numpy array into tab delay line format
+    converts 1D Numpy array into tap delay line format
     """
-    new_data = np.empty((0, TAB_DELAY), float)
-    with Bar('to_tab_delay progress...', max=data.shape[0]) as prog_bar:
+    new_data = np.empty((0, TAP_DELAY), float)
+    with Bar('to_tap_delay progress...', max=data.shape[0]) as prog_bar:
         for idx, _ in enumerate(data):
-            seq = data[(idx+1)-TAB_DELAY: idx+1]
+            seq = data[(idx+1)-TAP_DELAY: idx+1]
             if seq.shape[0] != 0:
                 new_data = np.append(new_data, np.array([seq]), axis=0)
             prog_bar.next()
     return new_data
 
 
-rx = to_tab_delay(rx)
+rx = to_tap_delay(rx)
 
 # remove first elements from tx
-tx = np.delete(tx, [range(TAB_DELAY-1)])
+tx = np.delete(tx, [range(TAP_DELAY-1)])
 
 
 # split data
