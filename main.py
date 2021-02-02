@@ -60,9 +60,11 @@ def to_tap_delay(data):
 
 
 rx = to_tap_delay(rx)
+print(f"rx post tapped delay line modification:\n{rx[:10]}")
 
 # remove first elements from tx
 tx = np.delete(tx, [range(TAP_DELAY-1)])
+print(f"tx starting from TAP_DELAYth value:\n{tx[:10]}")
 
 
 # split data
