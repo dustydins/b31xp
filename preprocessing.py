@@ -7,8 +7,6 @@ Handles preprocessing for rx and tx data in order to work for ML models
 
 import functools
 
-from tabulate import tabulate
-
 import numpy as np
 import pandas as pd
 
@@ -69,7 +67,7 @@ def test_split(_rx, _tx, test_size, random_state):
     return rx_train, rx_test, tx_train, tx_test
     """
     return train_test_split(_rx, _tx, test_size=test_size,
-                            random_state=random_state)
+                            random_state=random_state, shuffle=False)
 
 
 def summarise_data(_rx, _tx, tap_delay):
@@ -77,9 +75,8 @@ def summarise_data(_rx, _tx, tap_delay):
     Convert data to pandas dataframe for summarisation purposes
     """
     assert subsequence.has_been_called
-    assert _rx.shape[0] >= 10
     data_df = pd.DataFrame()
     for idx in range(tap_delay):
-        data_df[f"rx{idx}"] = _rx[:10, idx]
-    data_df["tx"] = _tx[:10]
-    print(tabulate(data_df, headers='keys', tablefmt='psql'))
+        data_df[f"rx{idx}"] = _rx[:, idx]
+    data_df["tx"] = _tx
+    return data_df
