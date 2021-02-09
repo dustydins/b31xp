@@ -48,6 +48,8 @@ rx_train, rx_test, tx_train, tx_test = preprocess.test_split(rx, tx,
 # MODEL
 ###############################################################################
 
+# TODO: create BER loss function
+
 model = Sequential()
 model.add(Dense(64, input_dim=rx_train.shape[1],
                 kernel_initializer='normal',
