@@ -53,7 +53,7 @@ model.add(Dense(64, input_dim=rx_train.shape[1],
                 kernel_initializer='normal',
                 activation='relu'))
 model.add(Dense(64, activation='relu'))
-model.add(Dense(1, activation='linear'))
+model.add(Dense(1, activation='linear'))  # try tanh
 
 model.compile(loss='mse', optimizer='adam', metrics=['mse', 'mae'])
 model.fit(rx_train, tx_train, epochs=EPOCHS,
