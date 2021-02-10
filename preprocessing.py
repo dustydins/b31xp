@@ -25,8 +25,16 @@ def data_from_mat(matfile, sample_size):
     _tx = [value[0] for value in mat_data['PAMsymTx']]
     _rx = [value[0] for value in mat_data['PAMsymRx']]
     # convert to numpy arrays (take only first SAMPLE_SIZE points)
-    _tx = np.array(_tx)[:sample_size]
-    _rx = np.array(_rx)[:sample_size]
+    _tx = np.array(_tx)
+    _rx = np.array(_rx)
+    print("------------------------------------------------------------------")
+    print(f"Raw data shape:\n\trx: {_rx.shape}\n\ttx: {_tx.shape}")
+    print("------------------------------------------------------------------")
+    _tx = _tx[:sample_size]
+    _rx = _rx[:sample_size]
+    print("------------------------------------------------------------------")
+    print(f"Sampled data shape:\n\trx: {_rx.shape}\n\ttx: {_tx.shape}")
+    print("------------------------------------------------------------------")
     return _tx, _rx
 
 
@@ -45,7 +53,7 @@ def tracecalls(func):
 @tracecalls
 def subsequence(_rx, _tx, tap_delay):
     """
-    Preprocessing for subsequencing rx data, and padding tx data to fit
+    Preprocessing for subsequencing rx data, and removing tx data accordingly
     """
     print("------------------------------------------------------------------")
     new_rx = np.empty((0, tap_delay), float)
