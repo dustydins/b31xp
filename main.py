@@ -18,7 +18,8 @@ from sklearn.metrics import accuracy_score
 import seaborn as sns
 import matplotlib.pyplot as plt
 
-import preprocessing as preprocess
+import preprocessing as pre
+import visualise as vis
 
 #  import matplotlib.pyplot as plt
 
@@ -39,7 +40,7 @@ VERBOSE = 1
 ###############################################################################
 
 # load data
-tx, rx = preprocess.data_from_mat(MATFILE, SAMPLE_S)
+tx, rx = pre.data_from_mat(MATFILE, SAMPLE_S)
 
 raw_df = pd.DataFrame()
 raw_df['tx'] = tx
@@ -49,13 +50,13 @@ print(tabulate(raw_df[:17], headers='keys', tablefmt='psql'))
 print("------------------------------------------------------------------")
 
 # subsequence data
-tx, rx = preprocess.subsequence(rx, tx, TAP_DELAY)
+tx, rx = pre.subsequence(rx, tx, TAP_DELAY)
 
-data_df = preprocess.summarise_data(rx, tx, TAP_DELAY)
+data_df = pre.summarise_data(rx, tx, TAP_DELAY)
 print(tabulate(data_df[:10], headers='keys', tablefmt='psql'))
 
 # split data
-rx_train, rx_test, tx_train, tx_test = preprocess.test_split(rx, tx,
+rx_train, rx_test, tx_train, tx_test = pre.test_split(rx, tx,
                                                              test_size=TEST_S,
                                                              random_state=42)
 
@@ -118,7 +119,8 @@ def plot_confusion_matrix(conf_matrix, title="Confusion Matrix"):
     plt.show()
 
 
-plot_confusion_matrix(cf_matrix)
+#  plot_confusion_matrix(cf_matrix)
+vis.plot_signal(results_df, sample_size=200)
 
 print("------------------------------------------------------------------")
 print(tabulate(results_df[:10], headers='keys', tablefmt='psql'))
@@ -129,3 +131,5 @@ print(conf_mat)
 print("------------------------------------------------------------------")
 print(f"Accuracy: {accuracy}")
 print("------------------------------------------------------------------")
+
+results_df.to_csv('results.csv')
