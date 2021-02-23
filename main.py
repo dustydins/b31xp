@@ -7,6 +7,7 @@ Testing tap delay line input for b31xp
 
 import numpy as np
 import pandas as pd
+import argparse
 from tabulate import tabulate
 
 from tensorflow.keras.models import Sequential
@@ -21,23 +22,43 @@ import matplotlib.pyplot as plt
 import preprocessing as pre
 import visualise as vis
 
-#  import matplotlib.pyplot as plt
+# =============================================================================
+# PARSE CLI ARGS
+# =============================================================================
+parser = argparse.ArgumentParser()
+parser.add_argument('-e', '--experiment', dest='experiment',
+                    help="Define a custom experiment name",
+                    type=str, default="n/a")
+parser.add_argument('-sh', '--save-headers', dest='save_headers',
+                    help="Will save column headers to csv",
+                    type=bool, default=False)
+parser.add_argument('-ss', '--subsequence-size', dest='subsequence_size',
+                    help="Define size of subsequence",
+                    type=int, default=8)
+args = parser.parse_args()
 
-###############################################################################
-# GLOBALS
-###############################################################################
+# =============================================================================
+# GLOBAL
+# =============================================================================
+
 
 MATFILE = './data/POF60m_PAMExp_2PAM_DR600Mbps.mat'
-TAP_DELAY = 1  # 8 good
+SUBSEQUENCE_SIZE = args.subsequence_size  # 8 good
 SAMPLE_S = 20000
 TEST_S = 0.2
-EPOCHS = 10  # 150 good
+EPOCHS = 150  # 150 good
 BATCH_SIZE = 32
 VERBOSE = 1
+SAVE_HEADERS = args.save_headers
 
-###############################################################################
+if args.experiment != 'n/a':
+    EXPERIMENT = args.experiment
+else:
+    EXPERIMENT = f"Subsequence Size: {SUBSEQUENCE_SIZE}"
+
+# =============================================================================
 # PRE-PROCESSING
-###############################################################################
+# =============================================================================
 
 # load data
 tx, rx = pre.data_from_mat(MATFILE, SAMPLE_S)
@@ -50,20 +71,20 @@ print(tabulate(raw_df[:17], headers='keys', tablefmt='psql'))
 print("------------------------------------------------------------------")
 
 # subsequence data
-tx, rx = pre.subsequence(rx, tx, TAP_DELAY)
+tx, rx = pre.subsequence(rx, tx, SUBSEQUENCE_SIZE)
 
-data_df = pre.summarise_data(rx, tx, TAP_DELAY)
+data_df = pre.summarise_data(rx, tx, SUBSEQUENCE_SIZE)
 print(tabulate(data_df[:10], headers='keys', tablefmt='psql'))
 
 # split data
 rx_train, rx_test, tx_train, tx_test = pre.test_split(rx, tx,
-                                                             test_size=TEST_S,
-                                                             random_state=42)
+                                                      test_size=TEST_S,
+                                                      random_state=42)
 
 
-###############################################################################
+# =============================================================================
 # MODEL
-###############################################################################
+# =============================================================================
 
 # TODO: create BER loss function
 
@@ -77,11 +98,9 @@ model.compile(loss='mse', optimizer='adam', metrics=['mse', 'mae'])
 model.fit(rx_train, tx_train, epochs=EPOCHS,
           batch_size=BATCH_SIZE, validation_split=0.2, verbose=VERBOSE)
 
-###############################################################################
+# =============================================================================
 # EVALUATE
-###############################################################################
-
-# TODO: tidy this up, create a visualisation module
+# =============================================================================
 
 preds = model.predict(rx_test)
 preds_bb = np.array([1 if pred[0] > 0 else -1 for pred in preds])
@@ -100,27 +119,11 @@ results_df['linear predictions'] = preds
 
 # calculate accuracy
 accuracy = accuracy_score(tx_test, preds_bb)
+results_df['accuracy'] = accuracy
+results_df['experiment'] = EXPERIMENT
+results_df['number_params'] = model.count_params()
 
-cf_matrix = confusion_matrix(tx_test, preds_bb)
-
-
-def plot_confusion_matrix(conf_matrix, title="Confusion Matrix"):
-    """
-    Plot confusion matrix
-    """
-    cm_df = pd.DataFrame(conf_matrix, index=['-1', '1'],
-                         columns=['-1', '1'])
-    plt.figure(figsize=(16, 16))
-    axes = sns.heatmap(cm_df/np.sum(cm_df),
-                       annot=True, cmap="Reds", cbar=False,
-                       fmt='.2%')
-    axes.set(ylabel='Ground Truth (Tx)', xlabel='Predictions')
-    axes.set_title(title)
-    plt.show()
-
-
-#  plot_confusion_matrix(cf_matrix)
-vis.plot_signal(results_df, sample_size=200)
+#  vis.plot_confusion_matrix(tx_test, preds_bb)
 
 print("------------------------------------------------------------------")
 print(tabulate(results_df[:10], headers='keys', tablefmt='psql'))
@@ -132,4 +135,4 @@ print("------------------------------------------------------------------")
 print(f"Accuracy: {accuracy}")
 print("------------------------------------------------------------------")
 
-results_df.to_csv('results_bad.csv')
+results_df.to_csv('./results/current_test.csv', mode='a', index=False, header=SAVE_HEADERS)
