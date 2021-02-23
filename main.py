@@ -29,6 +29,9 @@ parser = argparse.ArgumentParser()
 parser.add_argument('-e', '--experiment', dest='experiment',
                     help="Define a custom experiment name",
                     type=str, default="n/a")
+parser.add_argument('-v', '--verbose', dest='verbose',
+                    help="Run the program in verbose mode",
+                    action="store_true", default=False)
 parser.add_argument('-sh', '--save-headers', dest='save_headers',
                     help="Will save column headers to csv",
                     type=bool, default=False)
@@ -46,9 +49,9 @@ MATFILE = './data/POF60m_PAMExp_2PAM_DR600Mbps.mat'
 SUBSEQUENCE_SIZE = args.subsequence_size  # 8 good
 SAMPLE_S = 20000
 TEST_S = 0.2
-EPOCHS = 150  # 150 good
+EPOCHS = 100  # 150 good
 BATCH_SIZE = 32
-VERBOSE = 1
+VERBOSE = args.verbose
 SAVE_HEADERS = args.save_headers
 
 if args.experiment != 'n/a':
@@ -61,20 +64,23 @@ else:
 # =============================================================================
 
 # load data
-tx, rx = pre.data_from_mat(MATFILE, SAMPLE_S)
+tx, rx = pre.data_from_mat(MATFILE, SAMPLE_S, verbose=VERBOSE)
 
 raw_df = pd.DataFrame()
 raw_df['tx'] = tx
 raw_df['rx'] = rx
 
-print(tabulate(raw_df[:17], headers='keys', tablefmt='psql'))
-print("------------------------------------------------------------------")
+if VERBOSE:
+    print(tabulate(raw_df[:17], headers='keys', tablefmt='psql'))
+    print("------------------------------------------------------------------")
 
 # subsequence data
-tx, rx = pre.subsequence(rx, tx, SUBSEQUENCE_SIZE)
+tx, rx = pre.subsequence(rx, tx, SUBSEQUENCE_SIZE, verbose=VERBOSE)
 
 data_df = pre.summarise_data(rx, tx, SUBSEQUENCE_SIZE)
-print(tabulate(data_df[:10], headers='keys', tablefmt='psql'))
+
+if VERBOSE:
+    print(tabulate(data_df[:10], headers='keys', tablefmt='psql'))
 
 # split data
 rx_train, rx_test, tx_train, tx_test = pre.test_split(rx, tx,
@@ -117,22 +123,31 @@ conf_mat = pd.crosstab(results_df['ground truths (tx)'],
 
 results_df['linear predictions'] = preds
 
+# add padding to compensate for subsequencing
+for _ in range(SUBSEQUENCE_SIZE):
+    row = pd.DataFrame({'ground truths (tx)': [0],
+                        'binary bipolar predictions': [0],
+                        'linear predictions': [0.0]})
+    results_df = pd.concat([row, results_df]).reset_index(drop = True)
+
 # calculate accuracy
 accuracy = accuracy_score(tx_test, preds_bb)
 results_df['accuracy'] = accuracy
 results_df['experiment'] = EXPERIMENT
 results_df['number_params'] = model.count_params()
+results_df['sequence_position'] = np.arange(results_df.shape[0])
 
 #  vis.plot_confusion_matrix(tx_test, preds_bb)
 
-print("------------------------------------------------------------------")
-print(tabulate(results_df[:10], headers='keys', tablefmt='psql'))
-print("------------------------------------------------------------------")
-print(model.summary())
-print("------------------------------------------------------------------")
-print(conf_mat)
-print("------------------------------------------------------------------")
-print(f"Accuracy: {accuracy}")
-print("------------------------------------------------------------------")
+if VERBOSE:
+    print("------------------------------------------------------------------")
+    print(tabulate(results_df[:10], headers='keys', tablefmt='psql'))
+    print("------------------------------------------------------------------")
+    print(model.summary())
+    print("------------------------------------------------------------------")
+    print(conf_mat)
+    print("------------------------------------------------------------------")
+    print(f"Accuracy: {accuracy}")
+    print("------------------------------------------------------------------")
 
 results_df.to_csv('./results/current_test.csv', mode='a', index=False, header=SAVE_HEADERS)

@@ -15,7 +15,7 @@ from scipy.io import loadmat
 from sklearn.model_selection import train_test_split
 
 
-def data_from_mat(matfile, sample_size):
+def data_from_mat(matfile, sample_size, verbose=False):
     """
     Loads data from mat file into tx and rx numpy arrays
     """
@@ -27,14 +27,16 @@ def data_from_mat(matfile, sample_size):
     # convert to numpy arrays (take only first SAMPLE_SIZE points)
     _tx = np.array(_tx)
     _rx = np.array(_rx)
-    print("------------------------------------------------------------------")
-    print(f"Raw data shape:\n\trx: {_rx.shape}\n\ttx: {_tx.shape}")
-    print("------------------------------------------------------------------")
+    if verbose:
+        print("------------------------------------------------------------------")
+        print(f"Raw data shape:\n\trx: {_rx.shape}\n\ttx: {_tx.shape}")
+        print("------------------------------------------------------------------")
     _tx = _tx[:sample_size]
     _rx = _rx[:sample_size]
-    print("------------------------------------------------------------------")
-    print(f"Sampled data shape:\n\trx: {_rx.shape}\n\ttx: {_tx.shape}")
-    print("------------------------------------------------------------------")
+    if verbose:
+        print("------------------------------------------------------------------")
+        print(f"Sampled data shape:\n\trx: {_rx.shape}\n\ttx: {_tx.shape}")
+        print("------------------------------------------------------------------")
     return _tx, _rx
 
 
@@ -51,11 +53,12 @@ def tracecalls(func):
 
 
 @tracecalls
-def subsequence(_rx, _tx, tap_delay):
+def subsequence(_rx, _tx, tap_delay, verbose=False):
     """
     Preprocessing for subsequencing rx data, and removing tx data accordingly
     """
-    print("------------------------------------------------------------------")
+    if verbose:
+        print("------------------------------------------------------------------")
     new_rx = np.empty((0, tap_delay), float)
     with Bar('subsequencing in  progress...', max=_rx.shape[0]) as prog_bar:
         for idx, _ in enumerate(_rx):
@@ -63,7 +66,8 @@ def subsequence(_rx, _tx, tap_delay):
             if seq.shape[0] != 0:
                 new_rx = np.append(new_rx, np.array([seq]), axis=0)
             prog_bar.next()
-    print("------------------------------------------------------------------")
+    if verbose:
+        print("------------------------------------------------------------------")
     # remove first elements from tx
     _tx = np.delete(_tx, [range(tap_delay-1)])
     return _tx, new_rx
