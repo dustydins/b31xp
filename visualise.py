@@ -106,8 +106,7 @@ def plot_signal(data, sample_size=150, title='Truth Vs Predictions'):
     incorrect_patch = mpatches.Patch(color=C_INCORRECT,
                                      label='Incorrect Binary Tx Prediction (Mode)')
     handles, _ = plt.gca().get_legend_handles_labels()
-    fig.legend(loc='upper left',
-               handles=handles + [correct_patch, incorrect_patch],
+    fig.legend(handles=handles + [correct_patch, incorrect_patch],
                facecolor='#ffffff', framealpha=1)
 
     # add meta
