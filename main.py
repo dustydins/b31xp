@@ -13,14 +13,10 @@ from tabulate import tabulate
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense
 
-from sklearn.metrics import confusion_matrix
 from sklearn.metrics import accuracy_score
 
-import seaborn as sns
-import matplotlib.pyplot as plt
 
 import preprocessing as pre
-import visualise as vis
 
 # =============================================================================
 # PARSE CLI ARGS
@@ -128,7 +124,7 @@ for _ in range(SUBSEQUENCE_SIZE):
     row = pd.DataFrame({'ground truths (tx)': [0],
                         'binary bipolar predictions': [0],
                         'linear predictions': [0.0]})
-    results_df = pd.concat([row, results_df]).reset_index(drop = True)
+    results_df = pd.concat([row, results_df]).reset_index(drop=True)
 
 # calculate accuracy
 accuracy = accuracy_score(tx_test, preds_bb)
@@ -150,4 +146,5 @@ if VERBOSE:
     print(f"Accuracy: {accuracy}")
     print("------------------------------------------------------------------")
 
-results_df.to_csv('./results/current_test.csv', mode='a', index=False, header=SAVE_HEADERS)
+results_df.to_csv('./results/current_test.csv', mode='a',
+                  index=False, header=SAVE_HEADERS)
