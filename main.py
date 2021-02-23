@@ -28,10 +28,10 @@ import visualise as vis
 ###############################################################################
 
 MATFILE = './data/POF60m_PAMExp_2PAM_DR600Mbps.mat'
-TAP_DELAY = 8  # 8 good
+TAP_DELAY = 1  # 8 good
 SAMPLE_S = 20000
 TEST_S = 0.2
-EPOCHS = 150  # 150 good
+EPOCHS = 10  # 150 good
 BATCH_SIZE = 32
 VERBOSE = 1
 
@@ -132,4 +132,4 @@ print("------------------------------------------------------------------")
 print(f"Accuracy: {accuracy}")
 print("------------------------------------------------------------------")
 
-results_df.to_csv('results.csv')
+results_df.to_csv('results_bad.csv')
