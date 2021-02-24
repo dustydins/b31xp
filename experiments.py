@@ -29,4 +29,4 @@ DATA = pd.read_csv("./results/dataframe_test.csv")
 TITLE = '''Predicted Vs Ground Truth Tx Values \
 for Different Subsequencing Sizes'''
 
-vis.plot_signal(DATA, sample_size=100, title=TITLE)
+vis.plot_signal(DATA, sample_size=200, title=TITLE)
