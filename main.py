@@ -28,7 +28,7 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 # =============================================================================
 parser = argparse.ArgumentParser()
 parser.add_argument('-e', '--experiment', dest='experiment',
-                    help="Define a custom experiment name",
+                    help="Variable used in experiment",
                     type=str, default="n/a")
 parser.add_argument('-m', '--model', dest='model',
                     help="Select a model to train",
@@ -63,7 +63,6 @@ args = parser.parse_args()
 # GLOBAL
 # =============================================================================
 
-
 MATFILE = './data/POF60m_PAMExp_2PAM_DR600Mbps.mat'
 SUBSEQUENCE_SIZE = args.subsequence_size  # 8 good
 SAMPLE_S = 20000
@@ -83,9 +82,9 @@ if 'binary' in MODEL:
     IS_BINARY = True
 
 if args.experiment != 'n/a':
-    EXPERIMENT = args.experiment
-else:
-    EXPERIMENT = f"Subsequence Size: {SUBSEQUENCE_SIZE}"
+    experiment_str = args.experiment.title().replace('_', ' ')
+    experiment_val = eval(args.experiment)
+    EXPERIMENT = f'{experiment_str}: {experiment_val}'
 
 # =============================================================================
 # PRE-PROCESSING

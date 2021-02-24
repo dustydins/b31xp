@@ -19,8 +19,8 @@ C_CORRECT = '#2a9d8f50'
 C_INCORRECT = '#e76f5150'
 C_AXHLINE = '#c2c2c2'
 C_GROUND_TRUTH = '#14213d'
-C_PREDICTIONS = '#dc2f02'
-C_CONFIDENCE = '#dc2f02'
+C_PREDICTIONS = '#dc2f0295'
+C_CONFIDENCE = '#4002dc90'
 
 
 def plot_confusion_matrix(ground_truth, preds, title="Confusion Matrix"):
