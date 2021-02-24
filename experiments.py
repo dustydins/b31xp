@@ -19,7 +19,10 @@ parser.add_argument('-f', '--filename', dest='filename',
                     type=str, default="n/a")
 parser.add_argument('-t', '--title', dest='title',
                     help="Define a custom title",
-                    type=str, default="Predicted Vs Ground Truth Tx Values")
+                    type=str, default="")
+parser.add_argument('-v', '--visualise', dest='visualise',
+                    help="Visualise results",
+                    action="store_true", default=False)
 parser.add_argument('-a', '--aggregate', dest='aggregate',
                     help="Aggregate results",
                     action="store_true", default=False)
@@ -36,10 +39,11 @@ args = parser.parse_args()
 # =============================================================================
 
 FILENAME = args.filename
-TITLE = args.title
+TITLE = f"Predicted Vs Ground Truth Tx Values - {args.title}"
 AGGREGATE = args.aggregate
 IS_LINEAR = args.linear
 SAMPLE_SIZE = args.sample_size
+VISUALISE = args.visualise
 
 
 def aggregate_results():
@@ -49,22 +53,23 @@ def aggregate_results():
     """
     data = pd.read_csv("./results/current_test.csv")
 
+    mode = [lambda x: tuple(stats.mode(x)[0])[0]]
     data = data.groupby(['experiment', 'sequence_position']).agg({
-        'ground truths (tx)': [lambda x: tuple(stats.mode(x)[0])[0]],
-        'binary bipolar predictions': [lambda x: tuple(stats.mode(x)[0])[0]],
+        'ground truths (tx)': mode,
+        'binary bipolar predictions': mode,
         'linear predictions': ['mean'],
         'accuracy': ['mean'],
         'ber': ['mean'],
-        'number_params': [lambda x: tuple(stats.mode(x)[0])[0]]})
-    data.columns = [col[0] for col in DATA.columns.values]
+        'confidence': ['mean'],
+        'number_params': mode})
+    data.columns = [col[0] for col in data.columns.values]
     data.to_csv(f'./results/{FILENAME}.csv', index=True)
 
 
 if AGGREGATE:
     aggregate_results()
 
-#  DATA = pd.read_csv("./results/dataframe_test.csv")
-DATA = pd.read_csv(f"./results/{FILENAME}.csv")
-
-vis.plot_signal(DATA, sample_size=SAMPLE_SIZE,
-                title=TITLE, is_linear=IS_LINEAR)
+if VISUALISE:
+    DATA = pd.read_csv(f"./results/{FILENAME}.csv")
+    vis.plot_signal(DATA, sample_size=SAMPLE_SIZE,
+                    title=TITLE, is_linear=IS_LINEAR)

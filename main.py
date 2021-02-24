@@ -148,9 +148,11 @@ model.fit(rx_train, tx_train, epochs=EPOCHS,
 # =============================================================================
 
 preds = model.predict(rx_test)
+confidence = np.zeros(len(preds))
 
 if IS_BINARY:
     # select bit with highest probability
+    confidence = [np.max(instance) for instance in preds]
     preds = [np.argmax(instance) for instance in preds]
     tx_test = np.array([1 if signal > 0 else -1 for signal in tx_test])
 else:
@@ -164,17 +166,13 @@ results_df = pd.DataFrame()
 results_df['linear predictions'] = preds
 results_df['binary bipolar predictions'] = preds_bb
 results_df['ground truths (tx)'] = tx_test
+results_df['ground truths (tx)'] = tx_test
+results_df['confidence'] = confidence
 
 # confusion_matrix
 conf_mat = pd.crosstab(results_df['ground truths (tx)'],
                        results_df['binary bipolar predictions'],
                        rownames=['Actual'], colnames=['Predicted'])
-
-# add padding so visualisation starts with 0
-row = pd.DataFrame({'ground truths (tx)': [0],
-                    'binary bipolar predictions': [0],
-                    'linear predictions': [0.0]})
-results_df = pd.concat([row, results_df]).reset_index(drop=True)
 
 # calculate accuracy
 accuracy = accuracy_score(tx_test, preds_bb)

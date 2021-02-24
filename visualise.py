@@ -20,6 +20,7 @@ C_INCORRECT = '#e76f5150'
 C_AXHLINE = '#c2c2c2'
 C_GROUND_TRUTH = '#14213d'
 C_PREDICTIONS = '#dc2f02'
+C_CONFIDENCE = '#dc2f02'
 
 
 def plot_confusion_matrix(ground_truth, preds, title="Confusion Matrix"):
@@ -54,7 +55,6 @@ def add_signal(data, sample_size=150, is_linear=True):
     # resize data to sample
     ground_truth = data['ground truths (tx)'][:sample_size]
     preds_bin = data['binary bipolar predictions'][:sample_size:]
-    preds = data['linear predictions'][:sample_size]
     time = np.arange(sample_size)
 
     # add plots
@@ -62,8 +62,13 @@ def add_signal(data, sample_size=150, is_linear=True):
     plt.bar(time - 0.5, preds_bin, color=palette, width=1.0)
     plt.step(time, ground_truth, label='Ground Truth Tx', color=C_GROUND_TRUTH)
     if is_linear:
+        preds = data['linear predictions'][:sample_size]
         plt.plot(time, preds, label='Linear Tx Predicitions (Mean)',
                  color=C_PREDICTIONS, linestyle='--')
+    else:
+        confidence = data['confidence'][:sample_size]
+        plt.plot(time, confidence, label='Confidence (Mean)',
+                 color=C_CONFIDENCE, linestyle='--')
 
 
 def plot_signal(data, sample_size=150, title='Truth Vs Predictions',
@@ -74,13 +79,13 @@ def plot_signal(data, sample_size=150, title='Truth Vs Predictions',
     fig = plt.figure()
     _ax = fig.add_subplot(111)
     axes = []
+    experiments = pd.unique(data['experiment'])
 
-    if 'experiment' not in data:
+    if len(experiments) < 2:
         # if no experiment column, just plot the the data on a single chart
         add_signal(data, sample_size, is_linear=is_linear)
     else:
         # plot each experiment
-        experiments = pd.unique(data['experiment'])
         subplot_number = len(experiments)
 
         # disable container axes ticks
