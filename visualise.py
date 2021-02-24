@@ -38,7 +38,7 @@ def plot_confusion_matrix(ground_truth, preds, title="Confusion Matrix"):
     plt.show()
 
 
-def add_signal(data, sample_size=150):
+def add_signal(data, sample_size=150, is_linear=True):
     """
     Adds a signal to the current plot
     """
@@ -61,11 +61,13 @@ def add_signal(data, sample_size=150):
     plt.axhline(y=0, color=C_AXHLINE)
     plt.bar(time - 0.5, preds_bin, color=palette, width=1.0)
     plt.step(time, ground_truth, label='Ground Truth Tx', color=C_GROUND_TRUTH)
-    plt.plot(time, preds, label='Linear Tx Predicitions (Mean)',
-             color=C_PREDICTIONS, linestyle='--')
+    if is_linear:
+        plt.plot(time, preds, label='Linear Tx Predicitions (Mean)',
+                 color=C_PREDICTIONS, linestyle='--')
 
 
-def plot_signal(data, sample_size=150, title='Truth Vs Predictions'):
+def plot_signal(data, sample_size=150, title='Truth Vs Predictions',
+                is_linear=True):
     """
     Plot signal for each experiment
     """
@@ -75,7 +77,7 @@ def plot_signal(data, sample_size=150, title='Truth Vs Predictions'):
 
     if 'experiment' not in data:
         # if no experiment column, just plot the the data on a single chart
-        add_signal(data, sample_size)
+        add_signal(data, sample_size, is_linear=is_linear)
     else:
         # plot each experiment
         experiments = pd.unique(data['experiment'])
@@ -94,10 +96,12 @@ def plot_signal(data, sample_size=150, title='Truth Vs Predictions'):
             ax_experiment = fig.add_subplot(subplot_number, 1, idx+1)
             experiment_data = data[(data['experiment'] == experiment)]
             acc = pd.unique(experiment_data['accuracy'])[0]
+            ber = pd.unique(experiment_data['ber'])[0]
             param = pd.unique(experiment_data['number_params'])[0]
-            ex_title = f"{experiment} | Accuracy (Mean): {acc:.2%} | #Params: {param}"
+            ex_title = f"{experiment} | Accuracy (Mean): {acc:.2%} | Bit Error Rate (Mean): {ber:.2} | #Params: {param}"
             ax_experiment.set_title(ex_title)
-            add_signal(experiment_data, sample_size=sample_size)
+            add_signal(experiment_data, sample_size=sample_size,
+                       is_linear=is_linear)
             axes.append(ax_experiment)
 
     # add legend

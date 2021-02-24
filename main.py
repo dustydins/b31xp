@@ -5,6 +5,7 @@
 Testing tap delay line input for b31xp
 """
 
+import os
 import argparse
 
 import numpy as np
@@ -18,6 +19,9 @@ from sklearn.metrics import accuracy_score
 
 from models import Models
 import preprocessing as pre
+
+# suppress TensorFlow logs (Works for Linux, may need changed otherwise)
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
 # =============================================================================
 # PARSE CLI ARGS
@@ -74,6 +78,9 @@ NUM_HIDDEN = args.num_hidden
 NUM_NODES = args.num_nodes
 EPOCHS = args.epochs
 LEARNING_RATE = args.learning_rate
+IS_BINARY = False
+if 'binary' in MODEL:
+    IS_BINARY = True
 
 if args.experiment != 'n/a':
     EXPERIMENT = args.experiment
@@ -86,6 +93,9 @@ else:
 
 # load data
 tx, rx = pre.data_from_mat(MATFILE, SAMPLE_S, verbose=VERBOSE)
+
+if IS_BINARY:
+    tx = np.array([0 if x == -1 else 1 for x in tx])
 
 raw_df = pd.DataFrame()
 raw_df['tx'] = tx
@@ -103,11 +113,10 @@ data_df = pre.summarise_data(rx, tx, SUBSEQUENCE_SIZE)
 if VERBOSE:
     print(tabulate(data_df[:10], headers='keys', tablefmt='psql'))
 
-# split data
+# sequence_positionlit data
 rx_train, rx_test, tx_train, tx_test = pre.test_split(rx, tx,
                                                       test_size=TEST_S,
                                                       random_state=42)
-
 
 # =============================================================================
 # MODEL PREPARATION
@@ -134,34 +143,32 @@ model = compile_clf()
 model.fit(rx_train, tx_train, epochs=EPOCHS,
           batch_size=BATCH_SIZE, validation_split=0.2, verbose=VERBOSE)
 
-#  model = Sequential()
-#  model.add(Dense(32, input_dim=rx_train.shape[1],
-                #  kernel_initializer='normal',
-                #  activation='relu'))
-#  model.add(Dense(32, activation='relu'))
-#  model.add(Dense(1, activation='linear'))
-#  model.compile(loss='mse', optimizer='adam', metrics=['mse', 'accuracy'])
-#  model.fit(rx_train, tx_train, epochs=EPOCHS,
-          #  batch_size=BATCH_SIZE, validation_split=0.2, verbose=VERBOSE)
-
 # =============================================================================
 # EVALUATE
 # =============================================================================
 
 preds = model.predict(rx_test)
-preds_bb = np.array([1 if pred[0] > 0 else -1 for pred in preds])
+
+if IS_BINARY:
+    # select bit with highest probability
+    preds = [np.argmax(instance) for instance in preds]
+    tx_test = np.array([1 if signal > 0 else -1 for signal in tx_test])
+else:
+    # flatten linear predictions
+    preds = [x for pred in preds for x in pred]
+
+# get bipolar binary predictions
+preds_bb = np.array([1 if signal > 0 else -1 for signal in preds])
 
 results_df = pd.DataFrame()
+results_df['linear predictions'] = preds
 results_df['binary bipolar predictions'] = preds_bb
 results_df['ground truths (tx)'] = tx_test
-
 
 # confusion_matrix
 conf_mat = pd.crosstab(results_df['ground truths (tx)'],
                        results_df['binary bipolar predictions'],
                        rownames=['Actual'], colnames=['Predicted'])
-
-results_df['linear predictions'] = preds
 
 # add padding so visualisation starts with 0
 row = pd.DataFrame({'ground truths (tx)': [0],
@@ -169,8 +176,13 @@ row = pd.DataFrame({'ground truths (tx)': [0],
                     'linear predictions': [0.0]})
 results_df = pd.concat([row, results_df]).reset_index(drop=True)
 
+# calculate accuracy
 accuracy = accuracy_score(tx_test, preds_bb)
+# calculate bit error rate
+ber = 1.0 - accuracy
+
 results_df['accuracy'] = accuracy
+results_df['ber'] = ber
 results_df['experiment'] = EXPERIMENT
 results_df['number_params'] = model.count_params()
 results_df['sequence_position'] = np.arange(results_df.shape[0])

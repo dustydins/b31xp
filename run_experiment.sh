@@ -2,7 +2,7 @@
 
 rm results/current_test.csv;
 
-./run.sh 1 ./main.py -ss 1 -sh;
+./run.sh 1  ./main.py -ss 1  -sh;
 ./run.sh 19 ./main.py -ss 1;
 ./run.sh 20 ./main.py -ss 2;
 ./run.sh 20 ./main.py -ss 4;
