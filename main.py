@@ -5,17 +5,18 @@
 Testing tap delay line input for b31xp
 """
 
+import argparse
+
 import numpy as np
 import pandas as pd
-import argparse
 from tabulate import tabulate
 
-from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Dense
+#  from tensorflow.keras.models import Sequential
+#  from tensorflow.keras.layers import Dense
 
 from sklearn.metrics import accuracy_score
 
-
+from models import Models
 import preprocessing as pre
 
 # =============================================================================
@@ -25,15 +26,33 @@ parser = argparse.ArgumentParser()
 parser.add_argument('-e', '--experiment', dest='experiment',
                     help="Define a custom experiment name",
                     type=str, default="n/a")
+parser.add_argument('-m', '--model', dest='model',
+                    help="Select a model to train",
+                    type=str, default="mlp_linear")
 parser.add_argument('-v', '--verbose', dest='verbose',
                     help="Run the program in verbose mode",
                     action="store_true", default=False)
 parser.add_argument('-sh', '--save-headers', dest='save_headers',
                     help="Will save column headers to csv",
-                    type=bool, default=False)
+                    action="store_true", default=False)
+parser.add_argument('-ns', '--no-save', dest='no_save',
+                    help="Don't save results to file",
+                    action="store_true", default=False)
 parser.add_argument('-ss', '--subsequence-size', dest='subsequence_size',
                     help="Define size of subsequence",
                     type=int, default=8)
+parser.add_argument('-lr', '--learning_rate', dest='learning_rate',
+                    help="Set a different learning rate",
+                    type=float, default=0.001)
+parser.add_argument('-nh', '--num_hidden', dest='num_hidden',
+                    help="Set a different number of hidden layers",
+                    type=int, default=2)
+parser.add_argument('-nn', '--num_nodes', dest='num_nodes',
+                    help="Set a different number of nodes per hidden layer",
+                    type=int, default=32)
+parser.add_argument('-ep', '--epochs', dest='epochs',
+                    help="Set a different number of epochs",
+                    type=int, default=100)
 args = parser.parse_args()
 
 # =============================================================================
@@ -49,6 +68,12 @@ EPOCHS = 100  # 150 good
 BATCH_SIZE = 32
 VERBOSE = args.verbose
 SAVE_HEADERS = args.save_headers
+NO_SAVE = args.no_save
+MODEL = args.model
+NUM_HIDDEN = args.num_hidden
+NUM_NODES = args.num_nodes
+EPOCHS = args.epochs
+LEARNING_RATE = args.learning_rate
 
 if args.experiment != 'n/a':
     EXPERIMENT = args.experiment
@@ -85,20 +110,39 @@ rx_train, rx_test, tx_train, tx_test = pre.test_split(rx, tx,
 
 
 # =============================================================================
+# MODEL PREPARATION
+# =============================================================================
+
+# dataclass storing all classifier configurations used
+models = Models()
+
+
+def compile_clf():
+    """
+    Returns a newly compiled version of specified model
+    """
+    func = getattr(models, f"compile_{MODEL}")
+    return func(num_hidden=NUM_HIDDEN, num_nodes=NUM_NODES,
+                learning_rate=LEARNING_RATE)
+
+
+# =============================================================================
 # MODEL
 # =============================================================================
 
-# TODO: create BER loss function
-
-model = Sequential()
-model.add(Dense(32, input_dim=rx_train.shape[1],
-                kernel_initializer='normal',
-                activation='relu'))
-model.add(Dense(32, activation='relu'))
-model.add(Dense(1, activation='linear'))  # try tanh
-model.compile(loss='mse', optimizer='adam', metrics=['mse', 'mae'])
+model = compile_clf()
 model.fit(rx_train, tx_train, epochs=EPOCHS,
           batch_size=BATCH_SIZE, validation_split=0.2, verbose=VERBOSE)
+
+#  model = Sequential()
+#  model.add(Dense(32, input_dim=rx_train.shape[1],
+                #  kernel_initializer='normal',
+                #  activation='relu'))
+#  model.add(Dense(32, activation='relu'))
+#  model.add(Dense(1, activation='linear'))
+#  model.compile(loss='mse', optimizer='adam', metrics=['mse', 'accuracy'])
+#  model.fit(rx_train, tx_train, epochs=EPOCHS,
+          #  batch_size=BATCH_SIZE, validation_split=0.2, verbose=VERBOSE)
 
 # =============================================================================
 # EVALUATE
@@ -119,14 +163,12 @@ conf_mat = pd.crosstab(results_df['ground truths (tx)'],
 
 results_df['linear predictions'] = preds
 
-# add padding to compensate for subsequencing
-for _ in range(SUBSEQUENCE_SIZE):
-    row = pd.DataFrame({'ground truths (tx)': [0],
-                        'binary bipolar predictions': [0],
-                        'linear predictions': [0.0]})
-    results_df = pd.concat([row, results_df]).reset_index(drop=True)
+# add padding so visualisation starts with 0
+row = pd.DataFrame({'ground truths (tx)': [0],
+                    'binary bipolar predictions': [0],
+                    'linear predictions': [0.0]})
+results_df = pd.concat([row, results_df]).reset_index(drop=True)
 
-# calculate accuracy
 accuracy = accuracy_score(tx_test, preds_bb)
 results_df['accuracy'] = accuracy
 results_df['experiment'] = EXPERIMENT
@@ -146,5 +188,6 @@ if VERBOSE:
     print(f"Accuracy: {accuracy}")
     print("------------------------------------------------------------------")
 
-results_df.to_csv('./results/current_test.csv', mode='a',
-                  index=False, header=SAVE_HEADERS)
+if not NO_SAVE:
+    results_df.to_csv('./results/current_test.csv', mode='a',
+                      index=False, header=SAVE_HEADERS)
