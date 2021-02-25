@@ -113,9 +113,8 @@ if VERBOSE:
 # subsequence data
 tx, rx = pre.subsequence(rx, tx, SUBSEQUENCE_SIZE, verbose=VERBOSE)
 
-data_df = pre.summarise_data(rx, tx, SUBSEQUENCE_SIZE)
-
 if VERBOSE:
+    data_df = pre.summarise_data(rx, tx, SUBSEQUENCE_SIZE)
     print(tabulate(data_df[:10], headers='keys', tablefmt='psql'))
 
 # split data
