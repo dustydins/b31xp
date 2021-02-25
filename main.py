@@ -12,9 +12,6 @@ import numpy as np
 import pandas as pd
 from tabulate import tabulate
 
-#  from tensorflow.keras.models import Sequential
-#  from tensorflow.keras.layers import Dense
-
 from sklearn.metrics import accuracy_score
 
 from models import Models
@@ -26,7 +23,12 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 # =============================================================================
 # PARSE CLI ARGS
 # =============================================================================
+
+# parse arguments from CLI
 parser = argparse.ArgumentParser()
+parser.add_argument('-df', '--data-filename', dest='data',
+                    help="Provide a different data set for training/testing",
+                    type=str, default="POF60m_PAMExp_2PAM_DR600Mbps.mat")
 parser.add_argument('-e', '--experiment', dest='experiment',
                     help="Variable used in experiment",
                     type=str, default="n/a")
@@ -63,11 +65,11 @@ parser.add_argument('-sa', '--sample', dest='sample',
 args = parser.parse_args()
 
 # =============================================================================
-# GLOBAL
+# GLOBALS
 # =============================================================================
 
-MATFILE = './data/POF60m_PAMExp_2PAM_DR600Mbps.mat'
-SUBSEQUENCE_SIZE = args.subsequence_size  # 8 good
+DATA_FILE = f"./data/{args.data}"
+SUBSEQUENCE_SIZE = args.subsequence_size
 SAMPLE_S = args.sample
 TEST_S = 0.2
 BATCH_SIZE = 32
@@ -79,11 +81,13 @@ NUM_HIDDEN = args.num_hidden
 NUM_NODES = args.num_nodes
 EPOCHS = args.epochs
 LEARNING_RATE = args.learning_rate
+
 IS_BINARY = False
 if 'binary' in MODEL:
     IS_BINARY = True
 
 if args.experiment != 'n/a':
+    # experiment name formatted wrt experiment variable provided
     experiment_str = args.experiment.title().replace('_', ' ')
     experiment_val = eval(args.experiment)
     EXPERIMENT = f'{experiment_str}: {experiment_val}'
@@ -93,7 +97,7 @@ if args.experiment != 'n/a':
 # =============================================================================
 
 # load data
-tx, rx = pre.data_from_mat(MATFILE, SAMPLE_S, verbose=VERBOSE)
+tx, rx = pre.data_from_mat(DATA_FILE, SAMPLE_S, verbose=VERBOSE)
 
 if IS_BINARY:
     tx = np.array([0 if x == -1 else 1 for x in tx])
@@ -140,6 +144,7 @@ def compile_model():
 # MODEL
 # =============================================================================
 
+# compile and fit model
 model = compile_model()
 model.fit(rx_train, tx_train, epochs=EPOCHS,
           batch_size=BATCH_SIZE, validation_split=0.2, verbose=VERBOSE)
@@ -148,13 +153,16 @@ model.fit(rx_train, tx_train, epochs=EPOCHS,
 # EVALUATE
 # =============================================================================
 
+# get predictions from test set
 preds = model.predict(rx_test)
 confidence = np.zeros(len(preds))
 
 if IS_BINARY:
-    # select bit with highest probability
+    # save confidence
     confidence = [np.max(instance) for instance in preds]
+    # select bit with highest probability
     preds = [np.argmax(instance) for instance in preds]
+    # reformat ground truths to bipolar binary
     tx_test = np.array([1 if signal > 0 else -1 for signal in tx_test])
 else:
     # flatten linear predictions
@@ -163,29 +171,22 @@ else:
 # get bipolar binary predictions
 preds_bb = np.array([1 if signal > 0 else -1 for signal in preds])
 
-results_df = pd.DataFrame()
-results_df['linear predictions'] = preds
-results_df['binary bipolar predictions'] = preds_bb
-results_df['ground truths (tx)'] = tx_test
-results_df['confidence'] = confidence
-
-# confusion_matrix
-conf_mat = pd.crosstab(results_df['ground truths (tx)'],
-                       results_df['binary bipolar predictions'],
-                       rownames=['Actual'], colnames=['Predicted'])
-
 # calculate accuracy
 accuracy = accuracy_score(tx_test, preds_bb)
 # calculate bit error rate
 ber = 1.0 - accuracy
 
+# dataframe for saving to csv
+results_df = pd.DataFrame()
+results_df['linear predictions'] = preds
+results_df['binary bipolar predictions'] = preds_bb
+results_df['ground truths (tx)'] = tx_test
+results_df['confidence'] = confidence
 results_df['accuracy'] = accuracy
 results_df['ber'] = ber
 results_df['experiment'] = EXPERIMENT
 results_df['number_params'] = model.count_params()
 results_df['sequence_position'] = np.arange(results_df.shape[0])
-
-#  vis.plot_confusion_matrix(tx_test, preds_bb)
 
 if VERBOSE:
     print("------------------------------------------------------------------")
@@ -193,11 +194,10 @@ if VERBOSE:
     print("------------------------------------------------------------------")
     print(model.summary())
     print("------------------------------------------------------------------")
-    print(conf_mat)
-    print("------------------------------------------------------------------")
-    print(f"Accuracy: {accuracy}")
+    print(f"Accuracy: {accuracy:.2%}")
     print("------------------------------------------------------------------")
 
+# save to dataframe csv
 if not NO_SAVE:
     results_df.to_csv('./results/current_test.csv', mode='a',
                       index=False, header=SAVE_HEADERS)
