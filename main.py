@@ -57,6 +57,9 @@ parser.add_argument('-nn', '--num_nodes', dest='num_nodes',
 parser.add_argument('-ep', '--epochs', dest='epochs',
                     help="Set a different number of epochs",
                     type=int, default=100)
+parser.add_argument('-sa', '--sample', dest='sample',
+                    help="Set sample size",
+                    type=int, default=20000)
 args = parser.parse_args()
 
 # =============================================================================
@@ -65,9 +68,8 @@ args = parser.parse_args()
 
 MATFILE = './data/POF60m_PAMExp_2PAM_DR600Mbps.mat'
 SUBSEQUENCE_SIZE = args.subsequence_size  # 8 good
-SAMPLE_S = 20000
+SAMPLE_S = args.sample
 TEST_S = 0.2
-EPOCHS = 100  # 150 good
 BATCH_SIZE = 32
 VERBOSE = args.verbose
 SAVE_HEADERS = args.save_headers
@@ -112,7 +114,7 @@ data_df = pre.summarise_data(rx, tx, SUBSEQUENCE_SIZE)
 if VERBOSE:
     print(tabulate(data_df[:10], headers='keys', tablefmt='psql'))
 
-# sequence_positionlit data
+# split data
 rx_train, rx_test, tx_train, tx_test = pre.test_split(rx, tx,
                                                       test_size=TEST_S,
                                                       random_state=42)
@@ -125,7 +127,7 @@ rx_train, rx_test, tx_train, tx_test = pre.test_split(rx, tx,
 models = Models()
 
 
-def compile_clf():
+def compile_model():
     """
     Returns a newly compiled version of specified model
     """
@@ -138,7 +140,7 @@ def compile_clf():
 # MODEL
 # =============================================================================
 
-model = compile_clf()
+model = compile_model()
 model.fit(rx_train, tx_train, epochs=EPOCHS,
           batch_size=BATCH_SIZE, validation_split=0.2, verbose=VERBOSE)
 
@@ -164,7 +166,6 @@ preds_bb = np.array([1 if signal > 0 else -1 for signal in preds])
 results_df = pd.DataFrame()
 results_df['linear predictions'] = preds
 results_df['binary bipolar predictions'] = preds_bb
-results_df['ground truths (tx)'] = tx_test
 results_df['ground truths (tx)'] = tx_test
 results_df['confidence'] = confidence
 

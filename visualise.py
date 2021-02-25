@@ -121,8 +121,8 @@ def plot_signal(data, sample_size=150, title='Truth Vs Predictions',
     # add meta
     _ax.set_title(title, fontsize='xx-large',
                   pad=40)
-    _ax.set_xlabel('Sequence Position', fontsize='x-large')
-    _ax.set_ylabel('Signal Value', fontsize='x-large')
+    _ax.set_xlabel('Time serial number', fontsize='x-large')
+    _ax.set_ylabel('Amplitude coefficient', fontsize='x-large')
 
     # disable all but last axes ticks
     for ax_experiment in axes[:-1]:
