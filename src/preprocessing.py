@@ -57,17 +57,20 @@ def subsequence(_rx, _tx, tap_delay, verbose=False):
     """
     Preprocessing for subsequencing rx data, and removing tx data accordingly
     """
+    prog_bar = None
     if verbose:
         print("------------------------------------------------------------------")
+        prog_bar = Bar('subsequencing in  progress...', max=_rx.shape[0])
+
     new_rx = np.empty((0, tap_delay), float)
-    with Bar('subsequencing in  progress...', max=_rx.shape[0]) as prog_bar:
-        for idx, _ in enumerate(_rx):
-            seq = _rx[(idx+1)-tap_delay: idx+1]
-            if seq.shape[0] != 0:
-                new_rx = np.append(new_rx, np.array([seq]), axis=0)
+    for idx, _ in enumerate(_rx):
+        seq = _rx[(idx+1)-tap_delay: idx+1]
+        if seq.shape[0] != 0:
+            new_rx = np.append(new_rx, np.array([seq]), axis=0)
+        if verbose:
             prog_bar.next()
     if verbose:
-        print("------------------------------------------------------------------")
+        print("\n------------------------------------------------------------------")
     # remove first elements from tx
     _tx = np.delete(_tx, [range(tap_delay-1)])
     return _tx, new_rx
