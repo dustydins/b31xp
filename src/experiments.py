@@ -51,7 +51,8 @@ def aggregate_results():
     Groups and aggregates results by sequence position and
     experiment name
     """
-    data = pd.read_csv("./results/current_test.csv")
+    data = pd.read_csv("../results/current_test.csv", low_memory=False)
+    print(data)
 
     mode = [lambda x: tuple(stats.mode(x)[0])[0]]
     data = data.groupby(['experiment', 'sequence_position']).agg({
@@ -63,13 +64,13 @@ def aggregate_results():
         'confidence': ['mean'],
         'number_params': mode})
     data.columns = [col[0] for col in data.columns.values]
-    data.to_csv(f'./results/{FILENAME}.csv', index=True)
+    data.to_csv(f'../results/{FILENAME}.csv', index=True)
 
 
 if AGGREGATE:
     aggregate_results()
 
 if VISUALISE:
-    DATA = pd.read_csv(f"./results/{FILENAME}.csv")
+    DATA = pd.read_csv(f"../results/{FILENAME}.csv")
     vis.plot_signal(DATA, sample_size=SAMPLE_SIZE,
                     title=TITLE, is_linear=IS_LINEAR)
