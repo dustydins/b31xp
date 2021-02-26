@@ -68,7 +68,7 @@ args = parser.parse_args()
 # GLOBALS
 # =============================================================================
 
-DATA_FILE = f"./data/{args.data}"
+DATA_FILE = f"../data/{args.data}"
 SUBSEQUENCE_SIZE = args.subsequence_size
 SAMPLE_S = args.sample
 TEST_S = 0.2
@@ -198,5 +198,5 @@ if VERBOSE:
 
 # save to dataframe csv
 if not NO_SAVE:
-    results_df.to_csv('./results/current_test.csv', mode='a',
+    results_df.to_csv('../results/current_test.csv', mode='a',
                       index=False, header=SAVE_HEADERS)
