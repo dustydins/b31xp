@@ -15,7 +15,6 @@ from tabulate import tabulate
 from sklearn.metrics import accuracy_score
 
 from models import compile_model
-#  from models import Models
 import preprocessing as pre
 
 # suppress TensorFlow logs (Works for Linux, may need changed otherwise)
