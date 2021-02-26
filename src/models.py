@@ -28,7 +28,7 @@ class Models:
     # LINEAR MLP - mlp_linear
     # =================================================================
 
-    def compile_mlp_linear(self, num_hidden=2, num_nodes=32,
+    def compile_mlp_linear(self, architecture=[0],
                            learning_rate=0.001):
         """
         MLP_LINEAR - construct a linear multi layer perceptron
@@ -36,7 +36,7 @@ class Models:
         optimiser = Adam(lr=learning_rate)
 
         self._mlp_linear = Sequential()
-        for _ in range(num_hidden):
+        for num_nodes in architecture:
             self._mlp_linear.add(Dense(num_nodes, activation='relu'))
         self._mlp_linear.add(Dense(1, activation='linear'))
         self._mlp_linear.compile(optimizer=optimiser,
@@ -48,7 +48,7 @@ class Models:
     # BINARY MLP - mlp_binary
     # =================================================================
 
-    def compile_mlp_binary(self, num_hidden=2, num_nodes=32,
+    def compile_mlp_binary(self, architecture=[0],
                            learning_rate=0.001):
         """
         MLP_BINARY - construct a binary multi layer perceptron
@@ -56,7 +56,7 @@ class Models:
         optimiser = Adam(lr=learning_rate)
 
         self._mlp_binary = Sequential()
-        for _ in range(num_hidden):
+        for num_nodes in architecture:
             self._mlp_binary.add(Dense(num_nodes, activation='relu'))
         self._mlp_binary.add(Dense(2, activation='softmax'))
         self._mlp_binary.compile(optimizer=optimiser,

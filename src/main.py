@@ -50,18 +50,15 @@ parser.add_argument('-ss', '--subsequence-size', dest='subsequence_size',
 parser.add_argument('-lr', '--learning_rate', dest='learning_rate',
                     help="Set a different learning rate",
                     type=float, default=0.001)
-parser.add_argument('-nh', '--num_hidden', dest='num_hidden',
-                    help="Set a different number of hidden layers",
-                    type=int, default=2)
-parser.add_argument('-nn', '--num_nodes', dest='num_nodes',
-                    help="Set a different number of nodes per hidden layer",
-                    type=int, default=32)
 parser.add_argument('-ep', '--epochs', dest='epochs',
                     help="Set a different number of epochs",
                     type=int, default=100)
 parser.add_argument('-sa', '--sample', dest='sample',
                     help="Set sample size",
                     type=int, default=20000)
+parser.add_argument('-a', '--architecture', nargs='+', dest='architecture',
+                    help="number of nodes in each layer (list)",
+                    type=int, default=0)
 args = parser.parse_args()
 
 # =============================================================================
@@ -77,8 +74,7 @@ VERBOSE = args.verbose
 SAVE_HEADERS = args.save_headers
 NO_SAVE = args.no_save
 MODEL = args.model
-NUM_HIDDEN = args.num_hidden
-NUM_NODES = args.num_nodes
+ARCHITECTURE = args.architecture
 EPOCHS = args.epochs
 LEARNING_RATE = args.learning_rate
 
@@ -135,7 +131,7 @@ def compile_model():
     Returns a newly compiled version of specified model
     """
     func = getattr(models, f"compile_{MODEL}")
-    return func(num_hidden=NUM_HIDDEN, num_nodes=NUM_NODES,
+    return func(architecture=ARCHITECTURE,
                 learning_rate=LEARNING_RATE)
 
 
