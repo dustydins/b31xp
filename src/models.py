@@ -15,6 +15,16 @@ from keras.backend import set_floatx
 set_floatx('float64')
 
 
+def compile_model(model, architecture, learning_rate):
+    """
+    Returns a newly compiled version of specified model
+    """
+    models = Models()
+    func = getattr(models, f"compile_{model}")
+    return func(architecture=architecture,
+                learning_rate=learning_rate)
+
+
 @dataclass
 class Models:
     """
