@@ -14,7 +14,7 @@ from tabulate import tabulate
 
 from sklearn.metrics import accuracy_score
 
-from models import Models
+from models import compile_model
 import preprocessing as pre
 
 # suppress TensorFlow logs (Works for Linux, may need changed otherwise)
@@ -119,28 +119,11 @@ rx_train, rx_test, tx_train, tx_test = pre.test_split(rx, tx,
                                                       random_state=42)
 
 # =============================================================================
-# MODEL PREPARATION
-# =============================================================================
-
-# dataclass storing all classifier configurations used
-models = Models()
-
-
-def compile_model():
-    """
-    Returns a newly compiled version of specified model
-    """
-    func = getattr(models, f"compile_{MODEL}")
-    return func(architecture=ARCHITECTURE,
-                learning_rate=LEARNING_RATE)
-
-
-# =============================================================================
 # MODEL
 # =============================================================================
 
 # compile and fit model
-model = compile_model()
+model = compile_model(MODEL, ARCHITECTURE, LEARNING_RATE)
 model.fit(rx_train, tx_train, epochs=EPOCHS,
           batch_size=BATCH_SIZE, validation_split=0.2, verbose=VERBOSE)
 
