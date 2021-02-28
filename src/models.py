@@ -68,7 +68,7 @@ class Models:
         self._mlp_binary = Sequential()
         for num_nodes in architecture:
             self._mlp_binary.add(Dense(num_nodes, activation='relu'))
-        self._mlp_binary.add(Dense(2, activation='softmax'))
+        self._mlp_binary.add(Dense(4, activation='softmax'))
         self._mlp_binary.compile(optimizer=optimiser,
                                  loss='sparse_categorical_crossentropy',
                                  metrics=['accuracy'])

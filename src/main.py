@@ -19,6 +19,8 @@ import preprocessing as pre
 
 # suppress TensorFlow logs (Works for Linux, may need changed otherwise)
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
+DATA_TEST = 'POF60m_PAMExp_2PAM_DR600Mbps.mat'
+RAW_DATA = 'PAM_OS4_3_6dbm_26022021.csv'
 
 # =============================================================================
 # PARSE CLI ARGS
@@ -28,13 +30,13 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 parser = argparse.ArgumentParser()
 parser.add_argument('-df', '--data-filename', dest='data',
                     help="Provide a different data set for training/testing",
-                    type=str, default="POF60m_PAMExp_2PAM_DR600Mbps.mat")
+                    type=str, default=RAW_DATA)
 parser.add_argument('-e', '--experiment', dest='experiment',
                     help="Variable used in experiment",
                     type=str, default="n/a")
 parser.add_argument('-m', '--model', dest='model',
                     help="Select a model to train",
-                    type=str, default="mlp_linear")
+                    type=str, default="mlp_binary")
 parser.add_argument('-v', '--verbose', dest='verbose',
                     help="Run the program in verbose mode",
                     action="store_true", default=False)
@@ -46,7 +48,7 @@ parser.add_argument('-ns', '--no-save', dest='no_save',
                     action="store_true", default=False)
 parser.add_argument('-ss', '--subsequence-size', dest='subsequence_size',
                     help="Define size of subsequence",
-                    type=int, default=8)
+                    type=int, default=4)
 parser.add_argument('-lr', '--learning_rate', dest='learning_rate',
                     help="Set a different learning rate",
                     type=float, default=0.001)
@@ -64,6 +66,15 @@ args = parser.parse_args()
 # =============================================================================
 # GLOBALS
 # =============================================================================
+
+TX_LABELS = {'-8191': 0, '-2730': 1, '2730': 2, '8191': 3}
+TX_VALUES = {'0': -8191, '1': -2730, '2': 2730, '3': 8191}
+
+def to_label(value):
+    return TX_LABELS[str(value)]
+
+def to_value(label):
+    return TX_VALUES[str(label)]
 
 DATA_FILE = f"../data/{args.data}"
 SUBSEQUENCE_SIZE = args.subsequence_size
@@ -93,10 +104,10 @@ if args.experiment != 'n/a':
 # =============================================================================
 
 # load data
-tx, rx = pre.data_from_mat(DATA_FILE, SAMPLE_S, verbose=VERBOSE)
+tx, rx = pre.load_data(DATA_FILE, SAMPLE_S, verbose=VERBOSE)
 
 if IS_BINARY:
-    tx = np.array([0 if x == -1 else 1 for x in tx])
+    tx = np.array([to_label(x) for x in tx])
 
 raw_df = pd.DataFrame()
 raw_df['tx'] = tx
@@ -135,30 +146,22 @@ model.fit(rx_train, tx_train, epochs=EPOCHS,
 preds = model.predict(rx_test)
 confidence = np.zeros(len(preds))
 
-if IS_BINARY:
-    # save confidence
-    confidence = [np.max(instance) for instance in preds]
-    # select bit with highest probability
-    preds = [np.argmax(instance) for instance in preds]
-    # reformat ground truths to bipolar binary
-    tx_test = np.array([1 if signal > 0 else -1 for signal in tx_test])
-else:
-    # flatten linear predictions
-    preds = [x for pred in preds for x in pred]
-
-# get bipolar binary predictions
-preds_bb = np.array([1 if signal > 0 else -1 for signal in preds])
+# save confidence
+confidence = [np.max(instance) for instance in preds]
+# select bit with highest probability
+preds = [to_value(np.argmax(instance)) for instance in preds]
+# reformat ground truths to bipolar binary
+tx_test = np.array([to_value(x) for x in tx_test])
 
 # calculate accuracy
-accuracy = accuracy_score(tx_test, preds_bb)
+accuracy = accuracy_score(tx_test, preds)
 # calculate bit error rate
 ber = 1.0 - accuracy
 
 # dataframe for saving to csv
 results_df = pd.DataFrame()
-results_df['linear predictions'] = preds
-results_df['binary bipolar predictions'] = preds_bb
-results_df['ground truths (tx)'] = tx_test
+results_df['predictions'] = preds
+results_df['targets'] = tx_test
 results_df['confidence'] = confidence
 results_df['accuracy'] = accuracy
 results_df['ber'] = ber

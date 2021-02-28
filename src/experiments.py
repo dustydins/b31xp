@@ -26,9 +26,6 @@ parser.add_argument('-v', '--visualise', dest='visualise',
 parser.add_argument('-a', '--aggregate', dest='aggregate',
                     help="Aggregate results",
                     action="store_true", default=False)
-parser.add_argument('-l', '--linear', dest='linear',
-                    help="Results include linear predictions",
-                    action="store_true", default=False)
 parser.add_argument('-ss', '--sample-size', dest='sample_size',
                     help="Define size of sample to visualise",
                     type=int, default=200)
@@ -41,7 +38,6 @@ args = parser.parse_args()
 FILENAME = args.filename
 TITLE = f"Predicted Vs Ground Truth Tx Values - {args.title}"
 AGGREGATE = args.aggregate
-IS_LINEAR = args.linear
 SAMPLE_SIZE = args.sample_size
 VISUALISE = args.visualise
 
@@ -56,9 +52,8 @@ def aggregate_results():
 
     mode = [lambda x: tuple(stats.mode(x)[0])[0]]
     data = data.groupby(['experiment', 'sequence_position']).agg({
-        'ground truths (tx)': mode,
-        'binary bipolar predictions': mode,
-        'linear predictions': ['mean'],
+        'targets': mode,
+        'predictions': mode,
         'accuracy': ['mean'],
         'ber': ['mean'],
         'confidence': ['mean'],
@@ -73,4 +68,4 @@ if AGGREGATE:
 if VISUALISE:
     DATA = pd.read_csv(f"../results/{FILENAME}.csv")
     vis.plot_signal(DATA, sample_size=SAMPLE_SIZE,
-                    title=TITLE, is_linear=IS_LINEAR)
+                    title=TITLE)

@@ -15,16 +15,23 @@ from scipy.io import loadmat
 from sklearn.model_selection import train_test_split
 
 
-def data_from_mat(matfile, sample_size, verbose=False):
+def load_data(fname, sample_size, verbose=False):
     """
     Loads data from mat file into tx and rx numpy arrays
     """
+    _tx = []
+    _rx = []
     # load mat file
-    mat_data = loadmat(matfile)
-    # flatten tx/rx values
-    _tx = [value[0] for value in mat_data['PAMsymTx']]
-    _rx = [value[0] for value in mat_data['PAMsymRx']]
-    # convert to numpy arrays (take only first SAMPLE_SIZE points)
+    if '.mat' in fname:
+        data = loadmat(fname)
+        # flatten tx/rx values
+        _tx = [value[0] for value in data['PAMsymTx']]
+        _rx = [value[0] for value in data['PAMsymRx']]
+    else:
+        data = pd.read_csv(fname)
+        _tx = [value for value in data['targets']]
+        _rx = [value for value in data['logged_ADC']]
+        # convert to numpy arrays (take only first SAMPLE_SIZE points)
     _tx = np.array(_tx)
     _rx = np.array(_rx)
     if verbose:
