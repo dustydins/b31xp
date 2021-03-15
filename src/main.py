@@ -49,6 +49,9 @@ parser.add_argument('-ns', '--no-save', dest='no_save',
 parser.add_argument('-ss', '--subsequence-size', dest='subsequence_size',
                     help="Define size of subsequence",
                     type=int, default=4)
+parser.add_argument('-bs', '--batch-size', dest='batch_size',
+                    help="Define batch size",
+                    type=int, default=32)
 parser.add_argument('-lr', '--learning_rate', dest='learning_rate',
                     help="Set a different learning rate",
                     type=float, default=0.001)
@@ -61,6 +64,9 @@ parser.add_argument('-sa', '--sample', dest='sample',
 parser.add_argument('-a', '--architecture', nargs='+', dest='architecture',
                     help="number of nodes in each layer (list)",
                     type=int, default=0)
+parser.add_argument('-dr', '--dropout_rate', nargs='+', dest='dropout_rate',
+                    help="Set a different drop out rate (list)",
+                    type=float, default=0.0)
 args = parser.parse_args()
 
 # =============================================================================
@@ -80,7 +86,7 @@ DATA_FILE = f"../data/{args.data}"
 SUBSEQUENCE_SIZE = args.subsequence_size
 SAMPLE_S = args.sample
 TEST_S = 0.2
-BATCH_SIZE = 32
+BATCH_SIZE = args.batch_size
 VERBOSE = args.verbose
 SAVE_HEADERS = args.save_headers
 NO_SAVE = args.no_save
@@ -88,6 +94,7 @@ MODEL = args.model
 ARCHITECTURE = args.architecture
 EPOCHS = args.epochs
 LEARNING_RATE = args.learning_rate
+DROPOUT_RATE = args.dropout_rate
 
 IS_BINARY = False
 if 'binary' in MODEL:
@@ -106,8 +113,7 @@ if args.experiment != 'n/a':
 # load data
 tx, rx = pre.load_data(DATA_FILE, SAMPLE_S, verbose=VERBOSE)
 
-if IS_BINARY:
-    tx = np.array([to_label(x) for x in tx])
+tx = np.array([to_label(x) for x in tx])
 
 raw_df = pd.DataFrame()
 raw_df['tx'] = tx
@@ -134,7 +140,7 @@ rx_train, rx_test, tx_train, tx_test = pre.test_split(rx, tx,
 # =============================================================================
 
 # compile and fit model
-model = compile_model(MODEL, ARCHITECTURE, LEARNING_RATE)
+model = compile_model(MODEL, ARCHITECTURE, LEARNING_RATE, DROPOUT_RATE)
 model.fit(rx_train, tx_train, epochs=EPOCHS,
           batch_size=BATCH_SIZE, validation_split=0.2, verbose=VERBOSE)
 
