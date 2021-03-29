@@ -15,7 +15,7 @@ from scipy.io import loadmat
 from sklearn.model_selection import train_test_split
 
 
-def load_data(fname, sample_size, verbose=False):
+def load_data(fname, sample_size, verbose=False, is_signal=False):
     """
     Loads data from mat file into tx and rx numpy arrays
     """
@@ -25,8 +25,12 @@ def load_data(fname, sample_size, verbose=False):
     if '.mat' in fname:
         data = loadmat(fname)
         # flatten tx/rx values
-        _tx = [value[0] for value in data['PAMsymTx']]
-        _rx = [value[0] for value in data['PAMsymRx']]
+        if is_signal:
+            _tx = [value[0] for value in data['PAMTxSig']]
+            _rx = [value[0] for value in data['PAMRxSig']]
+        else:
+            _tx = [value[0] for value in data['PAMsymTx']]
+            _rx = [value[0] for value in data['PAMsymRx']]
     else:
         data = pd.read_csv(fname)
         _tx = [value for value in data['targets']]
@@ -83,13 +87,12 @@ def subsequence(_rx, _tx, tap_delay, verbose=False):
     return _tx, new_rx
 
 
-def test_split(_rx, _tx, test_size, random_state):
+def test_split(_rx, _tx, test_size):
     """
     train test split - separation of concerns
     return rx_train, rx_test, tx_train, tx_test
     """
-    return train_test_split(_rx, _tx, test_size=test_size,
-                            random_state=random_state, shuffle=False)
+    return train_test_split(_rx, _tx, test_size=test_size, shuffle=False)
 
 
 def summarise_data(_rx, _tx, tap_delay):

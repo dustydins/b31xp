@@ -38,7 +38,7 @@ CONFIDENCE_MIN = 4461
 CONFIDENCE_MAX = 6461
 
 
-def add_signal(data, sample_size=150):
+def add_signal(data, sample_size=150, y_ticks=Y_TICKS):
     """
     Adds a signal to the current plot
     """
@@ -57,7 +57,7 @@ def add_signal(data, sample_size=150):
     time = np.arange(sample_size)
 
     # plot grid lines
-    for tick in Y_TICKS[1:-1]:
+    for tick in y_ticks[1:-1]:
         if tick != 0:
             plt.axhline(y=tick, color=C_AXHLINE, linestyle='--', linewidth=1)
     plt.axhline(y=0, color=C_AXHLINE_CENTRE, linestyle='-')
@@ -99,7 +99,15 @@ def plot_signal(data, sample_size=150, title='Truth Vs Predictions'):
 
     if len(experiments) < 2:
         # if no experiment column, just plot the the data on a single chart
-        add_signal(data, sample_size)
+        # set y ticks
+        y_ticks = list(pd.unique(data['targets']))
+        y_ticks.sort()
+        y_ticks.insert(0, y_ticks[0]*1.5)
+        y_ticks.append(y_ticks[-1]*1.5)
+        y_ticks_labels = y_ticks.copy()
+        y_ticks_labels[0] = ''
+        y_ticks_labels[-1] = ''
+        add_signal(data, sample_size, y_ticks=y_ticks)
     else:
         # plot each experiment
         subplot_number = len(experiments)
@@ -114,6 +122,7 @@ def plot_signal(data, sample_size=150, title='Truth Vs Predictions'):
 
         # add experiment subplot
         for idx, experiment in enumerate(experiments):
+
             ax_experiment = fig.add_subplot(subplot_number, 1, idx+1)
             experiment_data = data[(data['experiment'] == experiment)]
             acc = pd.unique(experiment_data['accuracy'])[0]
@@ -121,11 +130,24 @@ def plot_signal(data, sample_size=150, title='Truth Vs Predictions'):
             param = pd.unique(experiment_data['number_params'])[0]
             ex_title = f"{experiment} | Accuracy (Mean): {acc:.2%} | Bit Error Rate (Mean): {ber:.2} | #Params: {param}"
             ax_experiment.set_title(ex_title)
-            add_signal(experiment_data, sample_size=sample_size)
-            ax_experiment.set_yticks(Y_TICKS)
-            ax_experiment.set_yticklabels(['', -8191, -2730, 0, 2730, 8191, ''],
-                                          fontsize=TICK_LABEL_S)
-            ax_experiment.yaxis.set_major_locator(ticker.FixedLocator(Y_TICKS[1:-1]))
+
+            # set y ticks
+            y_ticks = list(pd.unique(experiment_data['targets']))
+            y_ticks.sort()
+            y_ticks.insert(0, y_ticks[0]*1.5)
+            y_ticks.append(y_ticks[-1]*1.5)
+            y_ticks_labels = y_ticks.copy()
+            y_ticks_labels[0] = ''
+            y_ticks_labels[-1] = ''
+            add_signal(experiment_data, sample_size=sample_size, y_ticks=y_ticks)
+
+            
+            #  print(y_ticks)
+            #  print(y_ticks_labels)
+
+            ax_experiment.set_yticks(y_ticks)
+            ax_experiment.set_yticklabels(y_ticks_labels)
+            ax_experiment.yaxis.set_major_locator(ticker.FixedLocator(y_ticks[1:-1]))
 
             if idx == 0:
                 h, _ = plt.gca().get_legend_handles_labels()
@@ -156,8 +178,8 @@ def plot_signal(data, sample_size=150, title='Truth Vs Predictions'):
     # add meta
     _ax.set_title(title, fontsize='xx-large',
                   pad=40)
-    _ax.set_xlabel('Time serial number', fontsize='x-large', labelpad=30)
-    _ax.set_ylabel('PAM signal', fontsize='x-large', labelpad=30)
+    _ax.set_xlabel('Sample', fontsize='x-large', labelpad=30)
+    _ax.set_ylabel('Value', fontsize='x-large', labelpad=30)
     
 
     # disable all but last axes ticks

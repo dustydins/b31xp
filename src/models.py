@@ -17,7 +17,7 @@ from keras.backend import set_floatx
 set_floatx('float64')
 
 
-def compile_model(model, architecture, learning_rate, dropout_rate):
+def compile_model(model, architecture, learning_rate, dropout_rate, num_classes):
     """
     Returns a newly compiled version of specified model
     """
@@ -25,7 +25,8 @@ def compile_model(model, architecture, learning_rate, dropout_rate):
     func = getattr(models, f"compile_{model}")
     return func(architecture=architecture,
                 learning_rate=learning_rate,
-                dropout_rate=dropout_rate)
+                dropout_rate=dropout_rate,
+                num_classes=num_classes)
 
 
 @dataclass
@@ -43,7 +44,7 @@ class Models:
 
     def compile_mlp_binary(self, architecture=[0],
                            learning_rate=0.001,
-                           dropout_rate=None):
+                           dropout_rate=None, num_classes=4):
         """
         MLP_BINARY - construct a binary multi layer perceptron
         """
@@ -56,7 +57,7 @@ class Models:
             if isinstance(dropout_rate, list):
                 self._mlp_binary.add(Dropout(dropout_rate[idx],
                                              noise_shape=None, seed=None))
-        self._mlp_binary.add(Dense(4, activation='softmax'))
+        self._mlp_binary.add(Dense(num_classes, activation='softmax'))
         self._mlp_binary.compile(optimizer=optimiser,
                                  loss='sparse_categorical_crossentropy',
                                  metrics=['accuracy'])
@@ -68,7 +69,8 @@ class Models:
 
     def compile_mlp_hyperas(self, architecture=[0],
                             learning_rate=0.001,
-                            dropout_rate=0.0):
+                            dropout_rate=0.0,
+                            num_classes=4):
         """
         MLP_BINARY - construct a binary multi layer perceptron
         """
