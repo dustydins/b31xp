@@ -34,6 +34,19 @@ rm ../results/current_test.csv;
 # ./run.sh 20 ./main.py -a 32 32 -e  ARCHITECTURE -ss 4;
 # ./experiments.py -f num_nodes_mlp -a;
 
+# num nodes
+
+echo 'NUM LAYER: 1';
+./run.sh 1  ./main.py -df 2 -a 8  -e ARCHITECTURE -ss 4 -sh;
+./run.sh 19 ./main.py -df 2 -a 8 -e ARCHITECTURE -ss 4;
+echo 'NUM LAYER: 2';
+./run.sh 20 ./main.py -df 2 -a 8 8 -e  ARCHITECTURE -ss 4;
+echo 'NUM LAYER: 3';
+./run.sh 20 ./main.py -df 2 -a 8 8 8 -e  ARCHITECTURE -ss 4;
+echo 'NUM LAYER: 4';
+./run.sh 20 ./main.py -df 2 -a 8 8 8 8 -e  ARCHITECTURE -ss 4;
+./experiments.py -f num_hidden_mlp -a;
+
 # data set 
 
 # echo 'DATA SET: 1';
@@ -72,24 +85,139 @@ rm ../results/current_test.csv;
 
 # ARCHITECTURE DATA SET 4
 
-echo 'NUM NODES: 2';
-./run.sh 1  ./main.py -df 4 -a 2 2 -e ARCHITECTURE -ss 4 -sh;
-./run.sh 19 ./main.py -df 4 -a 2 2 -e ARCHITECTURE -ss 4;
-echo 'NUM NODES: 4';
-./run.sh 20 ./main.py -df 4 -a 4 4 -e  ARCHITECTURE -ss 4;
-echo 'NUM NODES: 8';
-./run.sh 20 ./main.py -df 4 -a 8 8 -e  ARCHITECTURE -ss 4;
-echo 'NUM NODES: 16';
-./run.sh 20 ./main.py -df 4 -a 16 16 -e  ARCHITECTURE -ss 4;
-echo 'NUM NODES: 32';
-./run.sh 20 ./main.py -df 4 -a 32 32 -e  ARCHITECTURE -ss 4;
-./experiments.py -f num_nodes_data_4 -a;
+# echo 'NUM NODES: 2';
+# ./run.sh 1  ./main.py -df 4 -a 2 2 -e ARCHITECTURE -ss 4 -sh;
+# ./run.sh 19 ./main.py -df 4 -a 2 2 -e ARCHITECTURE -ss 4;
+# echo 'NUM NODES: 4';
+# ./run.sh 20 ./main.py -df 4 -a 4 4 -e  ARCHITECTURE -ss 4;
+# echo 'NUM NODES: 8';
+# ./run.sh 20 ./main.py -df 4 -a 8 8 -e  ARCHITECTURE -ss 4;
+# echo 'NUM NODES: 16';
+# ./run.sh 20 ./main.py -df 4 -a 16 16 -e  ARCHITECTURE -ss 4;
+# echo 'NUM NODES: 32';
+# ./run.sh 20 ./main.py -df 4 -a 32 32 -e  ARCHITECTURE -ss 4;
+# ./experiments.py -f num_nodes_data_4 -a;
+
+# ARCHITECTURE DATA SET 5
+
+# rm ../results/current_test.csv;
+# echo 'NUM NODES: 2';
+# ./run.sh 1  ./main.py -df 5 -a 2 2 -e ARCHITECTURE -ss 4 -sh;
+# ./run.sh 19 ./main.py -df 5 -a 2 2 -e ARCHITECTURE -ss 4;
+# echo 'NUM NODES: 4';
+# ./run.sh 20 ./main.py -df 5 -a 4 4 -e  ARCHITECTURE -ss 4;
+# echo 'NUM NODES: 8';
+# ./run.sh 20 ./main.py -df 5 -a 8 8 -e  ARCHITECTURE -ss 4;
+# echo 'NUM NODES: 16';
+# ./run.sh 20 ./main.py -df 5 -a 16 16 -e  ARCHITECTURE -ss 4;
+# echo 'NUM NODES: 32';
+# ./run.sh 20 ./main.py -df 5 -a 32 32 -e  ARCHITECTURE -ss 4;
+# ./experiments.py -f num_nodes_data_5 -a;
+
+# ARCHITECTURE DATA SET 6
+
+# rm ../results/current_test.csv;
+# echo 'NUM NODES: 2';
+# ./run.sh 1  ./main.py -df 6 -a 2 2 -e ARCHITECTURE -ss 4 -sh;
+# ./run.sh 19 ./main.py -df 6 -a 2 2 -e ARCHITECTURE -ss 4;
+# echo 'NUM NODES: 4';
+# ./run.sh 20 ./main.py -df 6 -a 4 4 -e  ARCHITECTURE -ss 4;
+# echo 'NUM NODES: 8';
+# ./run.sh 20 ./main.py -df 6 -a 8 8 -e  ARCHITECTURE -ss 4;
+# echo 'NUM NODES: 16';
+# ./run.sh 20 ./main.py -df 6 -a 16 16 -e  ARCHITECTURE -ss 4;
+# echo 'NUM NODES: 32';
+# ./run.sh 20 ./main.py -df 6 -a 32 32 -e  ARCHITECTURE -ss 4;
+# ./experiments.py -f num_nodes_data_6 -a;
+
+# ARCHITECTURE DATA SET 7
+
+# rm ../results/current_test.csv;
+# echo 'NUM NODES: 2';
+# ./run.sh 1  ./main.py -df 7 -a 2 2 -e ARCHITECTURE -ss 4 -sh;
+# ./run.sh 19 ./main.py -df 7 -a 2 2 -e ARCHITECTURE -ss 4;
+# echo 'NUM NODES: 4';
+# ./run.sh 20 ./main.py -df 7 -a 4 4 -e  ARCHITECTURE -ss 4;
+# echo 'NUM NODES: 8';
+# ./run.sh 20 ./main.py -df 7 -a 8 8 -e  ARCHITECTURE -ss 4;
+# echo 'NUM NODES: 16';
+# ./run.sh 20 ./main.py -df 7 -a 16 16 -e  ARCHITECTURE -ss 4;
+# echo 'NUM NODES: 32';
+# ./run.sh 20 ./main.py -df 7 -a 32 32 -e  ARCHITECTURE -ss 4;
+# ./experiments.py -f num_nodes_data_7 -a;
+
+# ARCHITECTURE DATA SET 8
+
+# rm ../results/current_test.csv;
+# echo 'NUM NODES: 2';
+# ./run.sh 1  ./main.py -df 8 -a 2 2 -e ARCHITECTURE -ss 4 -sh;
+# ./run.sh 19 ./main.py -df 8 -a 2 2 -e ARCHITECTURE -ss 4;
+# echo 'NUM NODES: 4';
+# ./run.sh 20 ./main.py -df 8 -a 4 4 -e  ARCHITECTURE -ss 4;
+# echo 'NUM NODES: 8';
+# ./run.sh 20 ./main.py -df 8 -a 8 8 -e  ARCHITECTURE -ss 4;
+# echo 'NUM NODES: 16';
+# ./run.sh 20 ./main.py -df 8 -a 16 16 -e  ARCHITECTURE -ss 4;
+# echo 'NUM NODES: 32';
+# ./run.sh 20 ./main.py -df 8 -a 32 32 -e  ARCHITECTURE -ss 4;
+# ./experiments.py -f num_nodes_data_8 -a;
 
 # signal vs symbol data set 3
 
 # echo 'SIGNAL';
-# ./run.sh 1  ./main.py -s signal -df 3 -a 4 4 -e TYPE -ss 4 -sh;
-# ./run.sh 19 ./main.py -s signal -df 3 -a 4 4 -e TYPE -ss 4;
+# rm ../results/current_test.csv;
+# ./run.sh 1  ./main.py -s signal -df 3 -a 8 8 -e TYPE -ss 4 -sh;
+# ./run.sh 19 ./main.py -s signal -df 3 -a 8 8 -e TYPE -ss 4;
 # echo 'SYMBOL';
-# ./run.sh 20 ./main.py -df 3 -a 4 4 -e  TYPE -ss 4;
+# ./run.sh 20 ./main.py -df 3 -a 8 8 -e  TYPE -ss 4;
 # ./experiments.py -f sig_v_sym_data_3 -a;
+
+# signal vs symbol data set 4
+
+# rm ../results/current_test.csv;
+# echo 'SIGNAL';
+# ./run.sh 1  ./main.py -s signal -df 4 -a 8 8 -e TYPE -ss 4 -sh;
+# ./run.sh 19 ./main.py -s signal -df 4 -a 8 8 -e TYPE -ss 4;
+# echo 'SYMBOL';
+# ./run.sh 20 ./main.py -df 4 -a 8 8 -e  TYPE -ss 4;
+# ./experiments.py -f sig_v_sym_data_4 -a;
+
+# signal vs symbol data set 5
+
+# rm ../results/current_test.csv;
+# echo 'SIGNAL';
+# ./run.sh 1  ./main.py -s signal -df 5 -a 8 8 -e TYPE -ss 4 -sh;
+# ./run.sh 19 ./main.py -s signal -df 5 -a 8 8 -e TYPE -ss 4;
+# echo 'SYMBOL';
+# ./run.sh 20 ./main.py -df 5 -a 8 8 -e  TYPE -ss 4;
+# ./experiments.py -f sig_v_sym_data_5 -a;
+
+# signal vs symbol data set 6
+
+# rm ../results/current_test.csv;
+# echo 'SIGNAL';
+# ./run.sh 1  ./main.py -s signal -df 6 -a 8 8 -e TYPE -ss 4 -sh;
+# ./run.sh 19 ./main.py -s signal -df 6 -a 8 8 -e TYPE -ss 4;
+# echo 'SYMBOL';
+# ./run.sh 20 ./main.py -df 6 -a 8 8 -e  TYPE -ss 4;
+# ./experiments.py -f sig_v_sym_data_6 -a;
+
+# signal vs symbol data set 7
+
+# rm ../results/current_test.csv;
+# echo 'SIGNAL';
+# ./run.sh 1  ./main.py -s signal -df 7 -a 8 8 -e TYPE -ss 4 -sh;
+# ./run.sh 19 ./main.py -s signal -df 7 -a 8 8 -e TYPE -ss 4;
+# echo 'SYMBOL';
+# ./run.sh 20 ./main.py -df 7 -a 8 8 -e  TYPE -ss 4;
+# ./experiments.py -f sig_v_sym_data_7 -a;
+
+# signal vs symbol data set 8
+
+# rm ../results/current_test.csv;
+# echo 'SIGNAL';
+# ./run.sh 1  ./main.py -s signal -df 8 -a 8 8 -e TYPE -ss 4 -sh;
+# ./run.sh 19 ./main.py -s signal -df 8 -a 8 8 -e TYPE -ss 4;
+# echo 'SYMBOL';
+# ./run.sh 20 ./main.py -df 8 -a 8 8 -e  TYPE -ss 4;
+# ./experiments.py -f sig_v_sym_data_8 -a;
